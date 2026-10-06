@@ -75,30 +75,24 @@ Tinycast is **free, and it stays that way**. If you enjoy it, consider buying a 
 
 ## Install
 
-First, add the tap:
+This personal fork supports **Apple silicon on macOS 26 (Tahoe) or later**.
 
 ```sh
-brew trust --tap abue-ammar/tinycast   # required for third-party taps
-brew tap abue-ammar/tinycast
+brew trust --tap bfpimentel/tap
+brew install --cask bfpimentel/tap/tinycast
+brew upgrade --cask bfpimentel/tap/tinycast
 ```
 
-Then run the one line that matches your Mac:
+Homebrew manages app updates and clears download quarantine. The app does not self-update.
+Builds are ad-hoc signed automatically, with no certificate setup; macOS may ask you to re-grant
+permissions after an upgrade.
 
-| Your Mac                         | Install                                  |
-| -------------------------------- | ---------------------------------------- |
-| Apple silicon, macOS 26 or newer | `brew install --cask tinycast`           |
-| Intel, macOS 26                  | `brew install --cask tinycast-universal` |
-
-Not sure which you have? **Apple menu → About This Mac.** Homebrew checks too, and refuses the
-wrong one.
-
-Want early builds? `brew install --cask tinycast@beta` puts `Tinycast Beta.app` beside the stable
-app, with its own settings and permissions. Apple silicon, macOS 26+.
-
-Homebrew clears the macOS quarantine flag on every install and update, so there is nothing else to
-run. Downloading a DMG from [Releases](https://github.com/abue-ammar/tinycast/releases) instead?
-Tinycast is self-signed, so clear the flag once:
+For a directly downloaded [DMG](https://github.com/bfpimentel/tinycast/releases), clear quarantine
+on the installed app if needed:
 `xattr -dr com.apple.quarantine "/Applications/Tinycast.app"`.
+
+To publish your own build, run **Actions → Release** with a new version. Only
+`HOMEBREW_TAP_TOKEN` is required. See [release.md](docs/release.md).
 
 ## Permissions
 

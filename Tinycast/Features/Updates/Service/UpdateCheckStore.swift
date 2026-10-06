@@ -46,7 +46,7 @@ final class UpdateCheckStore {
         self.runningVersion = runningVersion
         self.fileURL = fileURL
         self.fetch = fetch
-        guard let data = try? Data(contentsOf: fileURL),
+        guard channel.updatesItself, let data = try? Data(contentsOf: fileURL),
             let cache = try? JSONDecoder().decode(Cache.self, from: data)
         else { return }
         latest = cache.latest
@@ -58,13 +58,13 @@ final class UpdateCheckStore {
 
     /// Newer than what is running. What the window offers, including a version already skipped.
     var update: AvailableRelease? {
-        guard let runningVersion else { return nil }
+        guard channel.updatesItself, let runningVersion else { return nil }
         return ReleaseFeed.offer(latest, running: runningVersion, skipped: nil)
     }
 
     /// The same, minus anything dismissed. Only this may interrupt the user.
     var unskippedUpdate: AvailableRelease? {
-        guard let runningVersion else { return nil }
+        guard channel.updatesItself, let runningVersion else { return nil }
         return ReleaseFeed.offer(latest, running: runningVersion, skipped: skippedVersion)
     }
 

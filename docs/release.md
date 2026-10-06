@@ -1,125 +1,58 @@
 # Release
 
-How a build reaches a user. The local development loop is in [development.md](development.md);
-the signing identity itself is in [signing.md](signing.md).
+This personal fork ships one stable, ad-hoc signed arm64 DMG for macOS 26 (Tahoe) or later.
+Homebrew installs and upgrades it; the app does not install its own updates.
 
-## Packaging a DMG locally
+## One-time setup
 
-```sh
-./Scripts/build-dmg.sh            # -> build/Tinycast-<version>.dmg (version from project.yml)
-./Scripts/build-dmg.sh 0.5.7      # -> build/Tinycast-0.5.7.dmg
-```
+1. Commit and push `Casks/tinycast.rb` to
+   [bfpimentel/homebrew-tap](https://github.com/bfpimentel/homebrew-tap).
+2. Add `HOMEBREW_TAP_TOKEN` to **bfpimentel/tinycast → Settings → Secrets and variables → Actions**.
+   Use a fine-grained PAT with **Contents: read/write** on `bfpimentel/homebrew-tap`.
 
-It builds a Release `Tinycast.app` signed with `Tinycast Self-Signed` and packs it with an
-`/Applications` symlink. Official per-channel releases are built by CI, below.
+That is the only configured release secret. GitHub supplies its own token for publishing the release.
+No signing certificate, Apple Developer account, keychain setup or signing secrets are needed.
+Signing and the permission trade-off are described in [signing.md](signing.md).
 
-## Signing & Gatekeeper
+## Publish a release
 
-Both local builds and CI releases sign with the same stable `Tinycast Self-Signed` identity, not an
-Apple Developer ID — so macOS quarantines a directly-downloaded DMG. The Homebrew cask strips that
-automatically; direct downloaders run `xattr -dr com.apple.quarantine "…/Tinycast.app"` once. Full
-details in [signing.md](signing.md).
+Push your changes, then open **Actions → Release → Run workflow** and enter a new stable version,
+such as `0.11.13`. Only `MAJOR.MINOR.PATCH` versions are accepted.
 
-## How the in-app updater consumes a release
+The workflow runs on `macos-26` with Xcode 26 and:
 
-Every release publishes two assets from one build: `Tinycast-<version>.dmg`, which people download by
-hand and which the cask installs, and `Tinycast-<version>.zip`, which the in-app updater installs. The
-zip is produced with `ditto -c -k --keepParent --sequesterRsrc` — the only zip that leaves the code
-signature verifiable, which matters because the updater refuses any bundle whose signature does not
-prove it is ours.
+1. Validates the version, tap token and committed cask before building.
+2. Runs `Scripts/build-dmg.sh` to build and package the arm64 app and both helpers.
+3. Checks the macOS floor, architectures, ad-hoc seals and runtime entitlements.
+4. Publishes `Tinycast-<version>.dmg` as GitHub Release `v<version>`, targeting the built commit.
+   GitHub generates the changelog; the notes also include the Homebrew commands.
+5. Updates the version and SHA-256 in the tap's `Casks/tinycast.rb` and pushes that change.
 
-A stable release publishes two more from the `universal` job, `Tinycast-Universal-<version>.dmg` and
-`.zip`, built from the same commit at the same version and bundle id but with both slices. They are
-uploaded *after* the thin pair, which keeps the thin zip first in the asset list so builds predating
-architecture-aware selection keep choosing it.
+Release runs are serialized so tap updates cannot race. There are no beta/universal jobs, ZIP
+artifacts, Discord announcements or website rebuilds. The checksum covers the actual uploaded DMG.
+The cask's version/checksum lines retain their two-space indent for the anchored replacement.
 
-Three things a release must keep true, or the updater skips it:
-
-- **It carries a `.zip` asset this Mac can run.** A DMG-only release is not installable and is not
-  offered, and an Intel build is offered nothing rather than a thin arm64 zip.
-- **The tag parses as `vMAJOR.MINOR.PATCH` or `vMAJOR.MINOR.PATCH-beta.N`,** and agrees with the
-  `prerelease` flag. A tag of any other shape is treated as mis-published and skipped.
-- **It is not a draft.**
-
-**Both casks declare `auto_updates true`.** That is Homebrew's flag for an app that manages its own
-version, and it is what keeps `brew update && brew upgrade` from fighting an app that updated itself:
-brew never reports Tinycast outdated, never re-downloads it, and never rolls a self-updated copy back.
-Removing that line would reintroduce exactly those three problems. See
-[features/updates.md](features/updates.md).
-
-## Pull request review
-
-There is no CI workflow. CodeRabbit reviews every PR against `.coderabbit.yaml`: it runs SwiftLint
-with `.swiftlint.yml`, annotates the diff and applies the pre-merge checks. It is a reviewer, not a
-gate — it neither runs the harnesses nor builds the app, so the whole bar in
-[testing.md](testing.md#definition-of-done) is run locally before a PR is opened.
-
-## Releasing
-
-`.github/workflows/release.yml` builds and publishes a DMG from GitHub Actions, no local machine
-needed. Run it from the **Actions** tab (`Release` → **Run workflow**) and pick:
-
-- **channel** — `beta` or `stable`. Each builds a distinct app (`Tinycast Beta.app` / `Tinycast.app`)
-  with its own bundle id, alongside the local `Tinycast Dev.app`. Beta gets an auto-incrementing
-  `-beta.N` suffix (`N` = the Actions run number) so re-running never collides; stable ships the
-  version as-is.
-- **version** — base semver, e.g. `0.2.0`.
-
-It builds on a `macos-26` runner with Xcode 26 and publishes a GitHub Release tagged
-`v<full-version>` with a versioned DMG and zip asset, marked prerelease for beta. On success it also
-bumps the matching cask in the tap and announces the release on Discord. A stable run also
-dispatches the Website workflow, because the site reads the latest version and the
-[changelog](https://tinycast.dev/changelog/) from GitHub at build time.
-
-A stable run then fans out to a second job, `universal`, which rebuilds the same commit with
-`ARCHS="arm64 x86_64"` and attaches `Tinycast-Universal-<version>.dmg` / `.zip` to the release the
-first job created, then bumps `tinycast-universal`. macOS 26 is the last release that boots on Intel,
-and those Macs need both slices. Both jobs pin `ARCHS` explicitly and assert the slices on *every*
-shipping binary — the app, `ClipboardTextHelper` and `Tinycast Dictation`: trusting `ARCHS_STANDARD` is what
-shipped a thin arm64 build to Intel users once already, and it also keeps the Apple silicon download
-from silently gaining a slice it never needs. A thin helper inside a universal app is the quiet form
-of the same bug: the app boots on Intel and only clipboard OCR or dictation stops working.
-
-Channel builds override `TINYCAST_BUNDLE_IDENTIFIER`, not the target-wide `PRODUCT_BUNDLE_IDENTIFIER`.
-The Dictation helper derives its own identifier with a `.dictation` suffix; signature verification
-checks that its bundle and signing identifiers agree and remain distinct from the main app.
-
-### Release notes
-
-`Scripts/release-notes.sh` composes the release body, and CI runs it just before `gh release create`.
-It is safe to run by hand against any tag — it only reads:
+## Install and upgrade
 
 ```sh
-CHANNEL=beta TAG=v0.9.13-beta.61 ./Scripts/release-notes.sh /tmp/body.md /tmp/discord.md
+brew trust --tap bfpimentel/tap
+brew install --cask bfpimentel/tap/tinycast
+brew upgrade --cask bfpimentel/tap/tinycast
 ```
 
-The changelog itself comes from GitHub's own release-notes API, which lists every merged PR with its
-author and number — so contributors are credited without anyone maintaining a `CHANGELOG.md`, and
-without Conventional Commits. **Nothing is ever committed to this repo**: the tag is created
-server-side by `gh release create`, and no release, bot or version-bump commit exists.
+Trust the third-party tap once before installing. The cask deliberately does not declare
+`auto_updates true`: Homebrew must track its version.
+It requires macOS `>= :tahoe` and `arch: :arm64`, and clears download quarantine during installation
+and upgrades. A directly downloaded DMG is not notarized; clear quarantine on the installed app with
+`xattr -dr com.apple.quarantine "/Applications/Tinycast.app"` if needed.
 
-Two details the script exists for:
+## Build a DMG locally
 
-- **The previous tag is picked per channel.** Beta and stable tags interleave on `main` — the same
-  commit can carry both — so "the previous release" is only ever right within one channel. A stable
-  release therefore spans every beta since the last stable.
-- **The body is split by `<!-- tinycast:install -->`.** Everything above it is the changelog;
-  everything below is the Homebrew and quarantine text, which only a download page needs. The update
-  window cuts at that marker — see [features/updates.md](features/updates.md). Full PR URLs are
-  shortened to `#304`, which still autolinks on the web and fits a 460pt window.
+```sh
+./Scripts/build-dmg.sh            # version from project.yml
+./Scripts/build-dmg.sh 0.11.13     # -> build/Tinycast-0.11.13.dmg
+```
 
-The Discord announcement carries the same changelog, truncated to fit Discord's component limit, and
-pings `@everyone`.
-
-### Homebrew tap automation
-
-Each job's final step rewrites the `version` + `sha256` of its cask (`tinycast`, `tinycast@beta` or
-`tinycast-universal`) in the [`homebrew-tinycast`](https://github.com/abue-ammar/homebrew-tinycast) tap
-and pushes. It needs a `HOMEBREW_TAP_TOKEN` repo secret — a fine-grained PAT with **Contents:
-read/write** on the tap repo. Without the secret the step logs a warning and skips; the release still
-publishes. The `sed` is anchored to `^  version` / `^  sha256`, so a cask's two-space indent on those
-lines is load-bearing.
-
-Both stable casks install `Tinycast.app` under `com.tinycast.app`, so they `conflicts_with` one
-another and Homebrew routes each Mac by `depends_on`: `tinycast` requires `arch: :arm64`, and
-`tinycast-universal` takes the Intel Macs.
+This is the same certificate-free build, verification and packaging path CI uses. Xcode is selected
+by `xcode-select` or an explicitly provided `DEVELOPER_DIR`. It preserves the existing bundle id
+`com.tinycast.app`, application name and data locations.

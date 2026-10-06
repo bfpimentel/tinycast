@@ -81,7 +81,8 @@ launcher presence are the three that moved for this.
 
 ## The format
 
-Sections follow the Settings sidebar and keys the rows of each pane. The app writes strict JSON with two
+Sections follow the Settings sidebar and keys the rows of each pane. The existing
+`general.automaticallyCheckForUpdates` field has no effect on this Homebrew-managed build. The app writes strict JSON with two
 spaces of indent, every list item on its own line and a trailing newline; comments are not allowed,
 because the app rewrites the file.
 

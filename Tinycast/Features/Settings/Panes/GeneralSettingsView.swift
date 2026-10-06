@@ -49,9 +49,12 @@ struct GeneralSettingsView: View {
                     SettingsRowTitle(.generalGeneral, "Show in menu bar")
                     Text("Shortcuts still work when hidden.")
                 }
-                Toggle(isOn: $settings.automaticallyCheckForUpdates) {
-                    SettingsRowTitle(.generalGeneral, "Automatically check for updates")
-                    Text("Check for Updates remains available when off.")
+                LabeledContent {
+                    Text("Homebrew")
+                } label: {
+                    SettingsRowTitle(.generalGeneral, "App Updates")
+                    Text("brew upgrade --cask bfpimentel/tap/tinycast")
+                        .textSelection(.enabled)
                 }
                 Picker(selection: $settings.popToRootTimeout) {
                     ForEach(PopToRootTimeout.allCases) { timeout in

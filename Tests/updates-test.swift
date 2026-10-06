@@ -100,16 +100,21 @@ struct UpdatesTests {
     // MARK: - ReleaseChannel
 
     static func derivesChannels() {
-        let stable = ReleaseChannel(bundleID: "com.tinycast.app")
+        let homebrew = ReleaseChannel(bundleID: "com.tinycast.app")
+        let stable = ReleaseChannel.stable
         let beta = ReleaseChannel(bundleID: "com.tinycast.app.beta")
         let dev = ReleaseChannel(bundleID: "com.tinycast.app.dev")
 
-        expect(stable == .stable, "the stable bundle id is the stable channel")
+        expect(homebrew == .homebrew, "the shipped bundle id is managed by Homebrew")
+        expect(!homebrew.updatesItself, "Homebrew builds never install their own updates")
+        expect(
+            !homebrew.accepts(prerelease: false) && !homebrew.accepts(prerelease: true),
+            "Homebrew builds accept no in-app releases")
         expect(beta == .beta, "the beta bundle id is the beta channel")
         expect(dev == .development, "the dev bundle id is a local build")
         expect(ReleaseChannel(bundleID: nil) == .development, "a missing bundle id never updates")
 
-        expect(stable.updatesItself && beta.updatesItself, "both shipped channels update")
+        expect(stable.updatesItself && beta.updatesItself, "upstream channels support in-app updates")
         expect(!dev.updatesItself, "a local build does not update itself")
 
         expect(stable.accepts(prerelease: false), "stable takes releases")
@@ -277,7 +282,6 @@ struct UpdatesTests {
 
     // MARK: - ReleaseNotes
 
-    /// A body as `Scripts/release-notes.sh` composes it.
     static let composedBody = """
         ## What's Changed
         * Adjust top padding in **UpdateWindowView** by @abue-ammar in #304

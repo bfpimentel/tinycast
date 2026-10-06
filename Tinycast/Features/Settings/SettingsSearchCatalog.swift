@@ -125,8 +125,8 @@ enum SettingsSearchCatalog {
             .generalGeneral, "Show in menu bar",
             keywords: ["menubar", "status item", "icon", "hide"]),
         .init(
-            .generalGeneral, "Automatically check for updates",
-            keywords: ["software", "update", "automatic", "disable", "popup"]),
+            .generalGeneral, "App Updates",
+            keywords: ["software", "update", "homebrew", "brew", "upgrade"]),
         .init(
             .generalGeneral, "Pop to Root Search",
             keywords: ["reset", "timeout", "back"]),
@@ -637,9 +637,6 @@ enum SettingsSearchCatalog {
         .init(
             pane: .about,
             keywords: ["version", "licence", "license", "credits"]),
-        .init(
-            .aboutAbout, "Check for Updates",
-            keywords: ["version", "upgrade", "release"]),
         .init(
             group: .aboutLinks, "Links",
             keywords: ["github", "source", "issues", "website"]),

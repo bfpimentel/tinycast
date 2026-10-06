@@ -13,9 +13,7 @@ settings:
     SWIFT_VERSION: "6.0"
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Manual
-    # Stable self-signed identity so macOS keeps the Accessibility grant across rebuilds.
-    # Create it once — see docs/signing.md.
-    CODE_SIGN_IDENTITY: "Tinycast Self-Signed"
+    CODE_SIGN_IDENTITY: "-"
     SWIFT_STRICT_CONCURRENCY: complete
     TINYCAST_BUNDLE_IDENTIFIER: com.tinycast.app
   configs:
@@ -81,9 +79,7 @@ targets:
           - "$(inherited)"
           - "@executable_path/../Frameworks"
       configs:
-        # Debug is its own channel, like beta/stable in release.yml: a distinct bundle id means a
-        # locally-run build gets its own prefs, caches, TCC grants and login item instead of
-        # inheriting — and corrupting — the installed app's state.
+        # Debug keeps preferences and permissions separate from the Homebrew app.
         Debug:
           PRODUCT_NAME: Tinycast Dev
 
@@ -95,9 +91,6 @@ targets:
       - Tinycast/Features/Clipboard/Service/ClipboardTextHelper.swift
     settings:
       base:
-        # release.yml passes PRODUCT_NAME on the xcodebuild line, which hits every target: without
-        # these two pinned, a channel build renames the executable `ClipboardTextWorker` looks for
-        # and gives the module a name with a space in it.
         EXECUTABLE_NAME: ClipboardTextHelper
         PRODUCT_MODULE_NAME: ClipboardTextHelper
         SKIP_INSTALL: YES

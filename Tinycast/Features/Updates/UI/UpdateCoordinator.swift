@@ -42,7 +42,7 @@ final class UpdateCoordinator {
     }
 
     func applyAutomaticChecking() {
-        if core.settings.automaticallyCheckForUpdates {
+        if store.channel.updatesItself && core.settings.automaticallyCheckForUpdates {
             store.start()
         } else {
             store.stop()
@@ -50,7 +50,8 @@ final class UpdateCoordinator {
     }
 
     func focusExisting() -> Bool {
-        window.focus()
+        guard store.channel.updatesItself else { return false }
+        return window.focus()
     }
 
     /// The window takes the height its content measured, so no stage pads itself out with space.
@@ -60,8 +61,11 @@ final class UpdateCoordinator {
 
     // MARK: - Entry points
 
-    /// The manual action: always opens the window and always asks GitHub.
     func checkForUpdates() {
+        guard store.channel != .homebrew else {
+            core.showMessage("Update with brew upgrade --cask bfpimentel/tap/tinycast.")
+            return
+        }
         guard store.channel.updatesItself else {
             stage = .localBuild
             present()
@@ -89,7 +93,7 @@ final class UpdateCoordinator {
 
     /// The automatic path: `false` answers that it withheld the prompt, so the store re-offers it.
     func presentIfAvailable(_ release: AvailableRelease) -> Bool {
-        guard core.settings.automaticallyCheckForUpdates else { return false }
+        guard store.channel.updatesItself, core.settings.automaticallyCheckForUpdates else { return false }
         switch stage {
         // Already in hand: re-offering would throw away a download or the relaunch it earned.
         case .installing, .readyToRelaunch:
@@ -105,7 +109,7 @@ final class UpdateCoordinator {
     // MARK: - Actions
 
     func install() {
-        guard let release = pendingRelease else { return }
+        guard store.channel.updatesItself, let release = pendingRelease else { return }
         // Re-asked at the moment of the click, never read from a flag that could have gone stale.
         if let blocker = UpdateReadiness.evaluate(core.currentActivity) {
             stage = .blocked(blocker, release)

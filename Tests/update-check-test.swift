@@ -9,6 +9,7 @@ struct UpdateCheckTests {
     static func main() async throws {
         try await stopsBeforeFirstCheck()
         try await cancelsAndRestarts()
+        try await homebrewNeverChecksOrOffersUpdates()
         print("\(passes) passed, \(failures) failed")
         if failures > 0 { exit(1) }
     }
@@ -83,6 +84,31 @@ struct UpdateCheckTests {
         expect(reopened.latest == store.latest, "manual checking persists the release")
     }
 
+    static func homebrewNeverChecksOrOffersUpdates() async throws {
+        let file = makeFile()
+        defer { try? FileManager.default.removeItem(at: file) }
+        try seedCache(at: file)
+        let original = try Data(contentsOf: file)
+        let fixture = FetchFixture()
+        let store = UpdateCheckStore(
+            channel: ReleaseChannel(bundleID: "com.tinycast.app"),
+            runningVersion: AppVersion("1.0.0"), fileURL: file,
+            fetch: { await fixture.immediateResponse() })
+        var offers = 0
+        store.onUpdateAvailable = { _ in offers += 1; return true }
+        defer { store.stop() }
+
+        store.start(after: .zero)
+        try await Task.sleep(for: .milliseconds(30))
+        let answered = await store.check()
+        expect(!answered, "Homebrew builds also refuse manual in-app checks")
+        expect(fixture.requests == 0, "Homebrew builds never fetch the upstream feed")
+        expect(offers == 0, "Homebrew builds never announce cached releases")
+        expect(store.latest == nil && store.update == nil && store.unskippedUpdate == nil,
+               "a previous update cache cannot enable the Homebrew updater")
+        expect(try Data(contentsOf: file) == original, "the unused cache is left untouched")
+    }
+
     static func seedCache(at file: URL) throws {
         guard let release = ReleaseFeed.newest(
             from: feed(version: "1.1.0"), channel: .stable, architecture: .current)
@@ -136,6 +162,11 @@ struct UpdateCheckTests {
         var requests = 0
         var wasCancelled = false
         private var response: CheckedContinuation<Data?, Never>?
+
+        func immediateResponse() -> Data? {
+            requests += 1
+            return UpdateCheckTests.feed(version: "1.2.0")
+        }
 
         func fetch() async -> Data? {
             requests += 1
