@@ -269,7 +269,8 @@ final class MenuPanelController {
         let inset = metrics.spacing.md
         let frame = corner.frame(
             contentSize: size, parentFrame: parent.frame, inset: inset,
-            headerExtent: metrics.size.headerPadding + metrics.size.headerHeight)
+            headerExtent: DashboardLayout.height(for: metrics)
+                + metrics.size.headerPadding + metrics.size.headerHeight)
         let canvas = corner.scaledFrame(frame, by: motion.maximumScale)
         let next = Placement(canvas: canvas, corner: corner)
         // Every arrow key re-pushes the tree; reconfiguring would cut the reveal short.

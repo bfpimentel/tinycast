@@ -101,7 +101,8 @@ If a change touches anything in the right column, the harness on the left is man
 | `palette-navigation-test` | `Palette/PaletteState.swift`'s screen motions — `prepare`, `replace`, `push`, `pop` |
 | `palette-selection-test` | `Features/PaletteRowIndex.swift` |
 | `interface-size-test` | `DesignSystem/InterfaceMetrics.swift`, `Features/Settings/InterfaceSize.swift`, `Extensions/Model/ExtensionFormMetrics.swift` |
-| `palette-placement-test` | `DesignSystem/Theme.swift`, `Palette/PalettePlacement.swift` |
+| `palette-placement-test` | `DesignSystem/Theme.swift`, `Palette/PalettePlacement.swift`, `Dashboard/UI/DashboardLayout.swift` |
+| `dashboard-test` | `Dashboard/` workspace decoding, read-only CLI queries, cancellation, timeouts, output bounds and scaled widget layout |
 | `hotkey-test` | `HotKeys/Model/DoubleTapModifier.swift`, `DoubleTapDetector.swift`, `ModifierKey.swift`, `ModifierKeyDetector.swift`, `HotKeyBinding.swift`, `HotKeySpelling.swift`, `HyperKey.swift`, `HotKeyAction.swift`, `Service/KeyShortcut.swift`, and the command→action mapping in `Launcher/Model/CommandID.swift` |
 | `dictation-test` | `Dictation/Model/DictationModel.swift`, `DictationTextFormatter.swift` — model paths and text formatting |
 | `dictation-field-test` | Composer rebinding and teardown, field-scoped dictation cancellation, and queued insertion validity; synthetic capture and real AppKit editors |

@@ -289,7 +289,12 @@ struct RootPaletteView: View {
                         screen.body(selection: sel, scroll: scroll)
                     }
                 }
-                .safeAreaInset(edge: .top, spacing: 0) { header }
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    VStack(spacing: 0) {
+                        DashboardView()
+                        header
+                    }
+                }
                 .safeAreaInset(edge: .bottom, spacing: 0) {
                     if !isCollapsed {
                         bottomBar(

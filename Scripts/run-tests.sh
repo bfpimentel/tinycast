@@ -232,7 +232,19 @@ run palette-placement-test Tinycast/Platform/Appearance.swift \
                            Tinycast/DesignSystem/Theme.swift \
                            Tinycast/DesignSystem/InterfaceMetrics.swift \
                            Tinycast/Features/Settings/InterfaceSize.swift \
-                           Tinycast/Palette/PalettePlacement.swift
+                           Tinycast/Palette/PalettePlacement.swift \
+                           Tinycast/Features/Dashboard/UI/DashboardLayout.swift
+run dashboard-test         Tinycast/Platform/Appearance.swift \
+                           Tinycast/Platform/ExecutableLocator.swift \
+                           Tinycast/Platform/ProcessExit.swift \
+                           Tinycast/DesignSystem/Theme.swift \
+                           Tinycast/DesignSystem/InterfaceMetrics.swift \
+                           Tinycast/Features/Settings/InterfaceSize.swift \
+                           Tinycast/Features/Dashboard/Model/AeroSpaceWorkspace.swift \
+                           Tinycast/Features/Dashboard/Service/AeroSpaceWorkspaceProvider.swift \
+                           Tinycast/Features/Dashboard/UI/DashboardLayout.swift \
+                           Tinycast/Features/Dashboard/UI/DateClockWidget.swift \
+                           Tinycast/Features/Dashboard/UI/AeroSpaceWorkspacesWidget.swift
 run scroll-reveal-test     Tinycast/DesignSystem/Scrolling/SelectionReveal.swift
 run redaction-test         Tinycast/DesignSystem/RedactedPlaceholder.swift
 run keyboard-focus-test    Tinycast/DesignSystem/Interaction/KeyboardFocus.swift

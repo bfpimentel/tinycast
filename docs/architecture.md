@@ -233,7 +233,7 @@ Tinycast/
   Assets.xcassets/  the app icon and the bundled image sets some catalog symbols resolve to
   Features/
     PaletteRowIndex.swift   the flat selection index — palette-owned, so it sits at the top
-    Launcher/ Clipboard/ Calculator/ Calendar/ Emoji/ FileSearch/ MenuSearch/ Notes/
+    Launcher/ Dashboard/ Clipboard/ Calculator/ Calendar/ Emoji/ FileSearch/ MenuSearch/ Notes/
     Quicklinks/ Snippets/ Uninstall/ SystemActions/ CustomCommands/ HotKeys/ Backup/
     WindowManagement/ Onboarding/ Updates/ Support/ AI/ Settings/
     Extensions/

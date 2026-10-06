@@ -284,7 +284,7 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
         let current = CGPoint(x: panel.frame.minX, y: panel.frame.maxY)
         let candidate = PalettePlacement.snapped(
             current, home: home, visibleFrame: screen.visibleFrame,
-            expandedHeight: metrics.size.panelHeight,
+            expandedHeight: DashboardLayout.panelHeight(for: metrics, collapsed: false),
             within: Theme.Size.paletteSnapDistance, previous: nil, speed: 0)
         // Mere proximity must not latch a fast drag before its first move.
         let pixel = 1 / screen.backingScaleFactor
@@ -333,7 +333,8 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
         }
         let snap = PalettePlacement.snapped(
             moved, home: session.home, visibleFrame: session.visibleFrame,
-            expandedHeight: metrics.size.panelHeight, within: Theme.Size.paletteSnapDistance,
+            expandedHeight: DashboardLayout.panelHeight(for: metrics, collapsed: false),
+            within: Theme.Size.paletteSnapDistance,
             previous: session.snap, speed: speed)
         let enteredVertical = snap.centeredX && !session.snap.centeredX
         let enteredHome = snap.height == .home && session.snap.height != .home
@@ -454,7 +455,7 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
     private func positionPanel(_ panel: NSPanel, collapsed: Bool) {
         guard let anchor = resolveAnchor() else { return }
         let size = metrics.size
-        let height = collapsed ? size.compactHeight : size.panelHeight
+        let height = DashboardLayout.panelHeight(for: metrics, collapsed: collapsed)
         let frame = NSRect(
             x: anchor.x, y: anchor.y - height, width: size.panelWidth, height: height)
         panel.setFrame(frame, display: true)
@@ -482,11 +483,14 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
             ? CGPoint(
                 x: defaultAnchor(on: screen).x,
                 y: PalettePlacement.expandedCenterY(
-                    in: screen.visibleFrame, expandedHeight: metrics.size.panelHeight))
+                    in: screen.visibleFrame,
+                    expandedHeight: DashboardLayout.panelHeight(for: metrics, collapsed: false)))
             : stored
         return PalettePlacement.restored(
             position,
-            graspable: CGSize(width: metrics.size.panelWidth, height: metrics.size.compactHeight),
+            graspable: CGSize(
+                width: metrics.size.panelWidth,
+                height: DashboardLayout.panelHeight(for: metrics, collapsed: true)),
             visibleFrame: screen.visibleFrame,
             minimumVisible: Theme.Size.paletteMinimumVisible)
     }

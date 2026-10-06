@@ -11,7 +11,9 @@ struct PalettePlacementTests {
     // Exactly what `PaletteWindowController` passes, at the size the user picked.
     static let metrics = InterfaceMetrics.standard
     static let width = metrics.size.panelWidth
-    static let graspable = CGSize(width: width, height: metrics.size.compactHeight)
+    static let expandedHeight = DashboardLayout.panelHeight(for: metrics, collapsed: false)
+    static let graspable = CGSize(
+        width: width, height: DashboardLayout.panelHeight(for: metrics, collapsed: true))
     static let minimumVisible = Theme.Size.paletteMinimumVisible
     static let snap = Theme.Size.paletteSnapDistance
     static let topFraction = Theme.Size.paletteTopMarginFraction
@@ -71,7 +73,7 @@ struct PalettePlacementTests {
 
         // The panel grows downward from the anchor, so a full-height list must still fit.
         expect(
-            anchor.y - metrics.size.panelHeight > laptop.minY,
+            anchor.y - expandedHeight > laptop.minY,
             "an expanded palette clears the bottom of the screen it opened on")
 
         // A screen offset from the origin must not shift the panel off it.
@@ -156,13 +158,13 @@ struct PalettePlacementTests {
     static func snapping() {
         for screen in [laptop, external] {
             let origin = home(screen)
-            let expandedY = screen.midY + metrics.size.panelHeight / 2
+            let expandedY = screen.midY + expandedHeight / 2
             func snapped(
                 _ point: CGPoint, previous: PalettePlacement.Snap? = nil, speed: CGFloat = 0
             ) -> PalettePlacement.Snap {
                 PalettePlacement.snapped(
                     point, home: origin, visibleFrame: screen,
-                    expandedHeight: metrics.size.panelHeight, within: snap,
+                    expandedHeight: expandedHeight, within: snap,
                     previous: previous, speed: speed)
             }
             let freeY = (origin.y + expandedY) / 2
@@ -229,7 +231,7 @@ struct PalettePlacementTests {
     static func expandedDetentFollowsGeometry() {
         let shifted = CGRect(x: 300, y: 50, width: 1800, height: 1000)
         for size in InterfaceSize.allCases {
-            let panelHeight = size.metrics.size.panelHeight
+            let panelHeight = DashboardLayout.panelHeight(for: size.metrics, collapsed: false)
             let top = PalettePlacement.expandedCenterY(
                 in: shifted, expandedHeight: panelHeight)
             expect(
@@ -241,10 +243,11 @@ struct PalettePlacementTests {
     // MARK: - Menu panels
 
     static func menuPanelAnchors() {
-        let parent = CGRect(x: 100, y: 200, width: 750, height: 475)
+        let parent = CGRect(x: 100, y: 200, width: width, height: expandedHeight)
         let content = CGSize(width: 276, height: 240)
         let inset = metrics.spacing.md
-        let headerExtent = metrics.size.headerPadding + metrics.size.headerHeight
+        let headerExtent = DashboardLayout.height(for: metrics)
+            + metrics.size.headerPadding + metrics.size.headerHeight
 
         let leading = MenuPanelCorner.bottomLeading.frame(
             contentSize: content, parentFrame: parent, inset: inset,
@@ -305,13 +308,14 @@ struct PalettePlacementTests {
                     in: screen, width: width, topMarginFraction: topFraction)
                 expect(anchor.x, screen.midX - width / 2, "the panel stays centred \(label)")
                 expect(
-                    anchor.y - metrics.size.panelHeight > screen.minY,
+                    anchor.y - DashboardLayout.panelHeight(for: metrics, collapsed: false) > screen.minY,
                     "an expanded palette clears the bottom of a \(Int(screen.width))pt display \(label)"
                 )
             }
 
             // The wider bar needs more of itself on screen, so a stored edge position can lapse.
-            let graspable = CGSize(width: width, height: metrics.size.compactHeight)
+            let graspable = CGSize(
+                width: width, height: DashboardLayout.panelHeight(for: metrics, collapsed: true))
             let sliver = CGPoint(x: laptop.maxX - minimumVisible, y: 900)
             expect(
                 PalettePlacement.restored(
