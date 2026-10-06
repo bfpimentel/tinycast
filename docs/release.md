@@ -42,8 +42,9 @@ brew upgrade --cask bfpimentel/tap/tinycast
 
 Trust the third-party tap once before installing. The cask deliberately does not declare
 `auto_updates true`: Homebrew must track its version.
-It requires macOS `>= :tahoe` and `arch: :arm64`, and clears download quarantine during installation
-and upgrades. A directly downloaded DMG is not notarized; clear quarantine on the installed app with
+It declares `depends_on macos: :tahoe` (Tahoe or later) and `depends_on arch: :arm64`, and clears
+download quarantine during installation and upgrades. A directly downloaded DMG is not notarized;
+clear quarantine on the installed app with
 `xattr -dr com.apple.quarantine "/Applications/Tinycast.app"` if needed.
 
 ## Build a DMG locally
