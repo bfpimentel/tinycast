@@ -164,6 +164,9 @@ enum SettingsSearchCatalog {
             .generalHyperKey, "Include Shift (⇧)",
             keywords: ["modifier", "chord"]),
         .init(
+            .generalHyperKey, "Secure Input Compatibility",
+            keywords: ["password", "secure input", "right control"]),
+        .init(
             .generalCalculator, "Number format",
             keywords: ["decimal", "comma", "separator", "locale", "region", "thousands"]),
         .init(
@@ -241,8 +244,8 @@ enum SettingsSearchCatalog {
             .quicklinksBehaviour, "Open in a new window",
             keywords: ["browser", "tab"]),
         .init(
-            .quicklinksBehaviour, "When there's no selected text",
-            keywords: ["selection", "fallback", "placeholder"]),
+            .quicklinksBehaviour, "Pass selected text as argument",
+            keywords: ["selection", "hotkey", "shortcut", "argument"]),
         .init(
             .quicklinksBehaviour, "Confirm before deleting",
             keywords: ["ask", "delete", "prompt"]),
@@ -346,19 +349,25 @@ enum SettingsSearchCatalog {
     private static let fileSearch: [SettingsSearchEntry] = [
         .init(
             pane: .fileSearch,
-            keywords: ["spotlight", "files", "folders", "find"]),
+            keywords: ["files", "folders", "find", "disk"]),
         .init(
             .fileSearchFileSearch, "Enable File Search",
-            keywords: ["spotlight", "index"]),
+            keywords: ["index", "disk"]),
+        .init(
+            group: .fileSearchFullDiskAccess, "Full Disk Access",
+            keywords: ["permission", "privacy", "grant", "fda"]),
+        .init(
+            group: .fileSearchIndex, "File index",
+            keywords: ["rebuild", "refresh", "reindex", "indexed files"]),
         .init(
             group: .fileSearchCommands, "File search commands",
             keywords: ["shortcut", "launcher"]),
         .init(
             group: .fileSearchSearchScopes, "Search Scopes",
-            keywords: ["folders", "locations", "home", "add folder"]),
+            keywords: ["folders", "locations", "home", "whole disk", "add folder"]),
         .init(
             group: .fileSearchIgnorePatterns, "Ignore Patterns",
-            keywords: ["exclude", "glob", "node_modules", "skip"])
+            keywords: ["exclude", "glob", "node_modules", "skip", "ignore folder"])
     ]
 
     private static let notes: [SettingsSearchEntry] = [
@@ -434,7 +443,7 @@ enum SettingsSearchCatalog {
             keywords: ["rectangle", "magnet", "spectacle", "defaults", "import", "shortcuts"]),
         .init(
             group: .windowManagementOptions, "Window commands",
-            keywords: ["shortcut", "left half", "maximize", "center"]),
+            keywords: ["shortcut", "alias", "left half", "maximize", "center"]),
         .init(
             group: .windowManagementLayoutCommands, "Layout and room commands",
             keywords: [
@@ -444,7 +453,7 @@ enum SettingsSearchCatalog {
             group: .windowManagementLayouts, "Window Layouts",
             keywords: [
                 "layout", "arrangement", "workspace", "preset", "restore windows",
-                "multi display", "monitor"
+                "multi display", "monitor", "alias"
             ]),
         .init(
             .windowManagementLayouts, "Show layouts in launcher",
@@ -459,7 +468,7 @@ enum SettingsSearchCatalog {
             group: .windowManagementRooms, "Rooms",
             keywords: [
                 "room", "project", "workspace", "tile", "focus", "columns", "grid", "stack",
-                "hide other apps", "switch project"
+                "hide other apps", "switch project", "alias"
             ]),
         .init(
             .windowManagementRooms, "Show rooms in launcher",
@@ -469,7 +478,7 @@ enum SettingsSearchCatalog {
             keywords: ["add", "create", "project", "windows"]),
         .init(
             group: .windowManagementCustomSizes, "Custom Sizes",
-            keywords: ["custom", "size", "resize", "dimensions", "pixels", "points", "percent"]),
+            keywords: ["custom", "size", "resize", "dimensions", "pixels", "points", "percent", "alias"]),
         .init(
             .windowManagementCustomSizes, "New Custom Size",
             keywords: ["add", "create", "resize", "window size"])
